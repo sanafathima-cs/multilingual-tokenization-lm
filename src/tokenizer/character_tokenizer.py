@@ -29,6 +29,7 @@ for i, char in enumerate(sorted_chars, start=1):
 
 print("Vocabulary size:", len(stoi))
 print("First 20 entries:", list(stoi.items())[:20])
+print("Last 20 entries:", list(stoi.items())[-20:])
 
 
 # Convert text to token IDs
