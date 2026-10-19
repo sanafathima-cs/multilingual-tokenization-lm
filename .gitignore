@@ -14,3 +14,12 @@ venv/
 
 #Environment/secrets
 .env
+
+# Datasets and local data
+data/
+datasets/
+*.parquet
+
+# Temporary training files
+*.tmp
+*.log

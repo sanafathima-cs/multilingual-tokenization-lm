@@ -1,4 +1,5 @@
 from pathlib import Path
+from tokenizers import Tokenizer
 
 # Dataset paths
 train_dir = Path("/srv/data/lt2326-h26/a1/train")
@@ -106,21 +107,91 @@ for lang in languages:
     )
 
 
-# Find validation characters not seen during training
-print("\n====== Unseen validation characters ======")
+# Find validation characters not covered by shared training data
+print("\n====== Unknown validation characters ======")
 
 for lang in languages:
     train_path = train_dir / f"{lang}.txt"
     valid_path = valid_dir / f"{lang}.txt"
+    lines = valid_path.read_text(encoding="utf-8").splitlines()
+   
+    
+    #characters absent from the shared vocabulary
+    unknown_chars = sorted({
+        char
+        for line in lines
+        for char in line 
+        if char not in stoi
+        })
 
-    train_text = train_path.read_text(encoding="utf-8")
-    valid_text = valid_path.read_text(encoding="utf-8")
-
-    train_chars = set(train_text)
-    valid_chars = set(valid_text)
-
-    unseen_chars = valid_chars - train_chars
+    #count actual occurences, not just distinct characters types
+    unknown_occurences = sum(
+        1 for line in lines
+        for char in line
+        if char not in stoi
+        )
+                           
+    #train_chars = set(train_text)
+    #valid_chars = set(valid_text)
+    #unseen_chars = valid_chars - train_chars
 
     print(f"\n{lang.upper()}")
-    print("Number of unseen validation characters:", len(unseen_chars))
-    print("Unseen characters:", sorted(unseen_chars))
+    print("Distinct unknown characters:", len(unknown_chars))
+    print("Unknown character occurences:", unknown_occurences)
+    print("Unknown characters:", unknown_chars)
+
+    # Load the two existing shared multilingual BPE tokenizers
+tokenizer_dir = Path(__file__).parent / "tokenizers"
+
+bpe_tokenizers = {
+    "BPE-2K": Tokenizer.from_file(
+        str(tokenizer_dir / "bpe_2k.json")
+    ),
+    "BPE-10K": Tokenizer.from_file(
+        str(tokenizer_dir / "bpe_10k.json")
+    ),
+}
+
+# Evaluate both tokenizers on each language's validation data
+for tokenizer_name, tokenizer in bpe_tokenizers.items():
+    print(f"\n{'=' * 12} {tokenizer_name} {'=' * 12}")
+    print("Vocabulary size:", tokenizer.get_vocab_size())
+
+    for lang in languages:
+        valid_path = valid_dir / f"{lang}.txt"
+        lines = valid_path.read_text(
+            encoding="utf-8"
+        ).splitlines()
+
+        total_tokens = 0
+        total_characters = 0
+
+        for line in lines:
+            encoded = tokenizer.encode(line)
+
+            total_tokens += len(encoded.ids)
+            total_characters += len(line)
+
+        num_sentences = len(lines)
+
+        average_tokens_per_sentence = (
+            total_tokens / num_sentences
+            if num_sentences else 0
+        )
+
+        average_characters_per_token = (
+            total_characters / total_tokens
+            if total_tokens else 0
+        )
+
+        print(f"\n{lang.upper()} validation data")
+        print("Total tokens:", total_tokens)
+        print("Sentences:", num_sentences)
+        print(
+            "Average tokens per sentence:",
+            average_tokens_per_sentence
+        )
+        print(
+            "Average Unicode characters per token:",
+            average_characters_per_token
+        )

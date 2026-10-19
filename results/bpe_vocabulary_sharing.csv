@@ -1,0 +1,15 @@
+tokenizer,language_group,token_types
+bpe_2k,EN,4
+bpe_2k,TR,125
+bpe_2k,ZH,809
+bpe_2k,EN + TR,43
+bpe_2k,EN + ZH,167
+bpe_2k,TR + ZH,48
+bpe_2k,EN + TR + ZH,738
+bpe_10k,EN,351
+bpe_10k,TR,1408
+bpe_10k,ZH,4653
+bpe_10k,EN + TR,354
+bpe_10k,EN + ZH,522
+bpe_10k,TR + ZH,91
+bpe_10k,EN + TR + ZH,2535
