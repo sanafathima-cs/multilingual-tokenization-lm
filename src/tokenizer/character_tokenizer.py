@@ -14,8 +14,7 @@ for lang in languages:
     path = train_dir / f"{lang}.txt"
     text = path.read_text(encoding="utf-8")
 
-    for line in text.splitlines():
-        chars.update(line)
+    chars.update(text)
 
 # Sort characters for deterministic IDs
 sorted_chars = sorted(chars)
